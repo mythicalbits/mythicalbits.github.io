@@ -1,0 +1,14 @@
+{
+	"version": 3,
+	"file": "styles.css",
+	"sources": [
+		"styles.scss",
+		"_sass/main.scss"
+	],
+	"sourcesContent": [
+		"@import \"main\";\n",
+		"html {\n  font-family: 'Share Tech Mono', monospace;\n  height: 100%;\n}\n\nbody {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  padding-left: 5rem;\n  padding-right: 5rem;\n}\n\n#logo {\n  height: inherit;\n}\n\n#header {\n  display: flex;\n  width: 100%;\n  height: 5rem;\n  align-items: center;\n  h1 {\n    padding-left: .5rem;\n  }\n}\n\nhr {\n  margin-top: 0.5rem;\n  size: 1em;\n  width: 100%;\n  color: #333;\n}\n\n#container {\n  width: 100%;\n  height: 100%;\n}\n\n#post-list {\n  padding-top: 3rem;\n}\n"
+	],
+	"names": [],
+	"mappings": "ACAA,AAAA,IAAI,CAAC,EACH,WAAW,EAAE,4BAA4B,EACzC,MAAM,EAAE,IAAI,GACb;;AAED,AAAA,IAAI,CAAC,EACH,OAAO,EAAE,IAAI,EACb,cAAc,EAAE,MAAM,EACtB,MAAM,EAAE,IAAI,EACZ,YAAY,EAAE,IAAI,EAClB,aAAa,EAAE,IAAI,GACpB;;AAED,AAAA,KAAK,CAAC,EACJ,MAAM,EAAE,OAAO,GAChB;;AAED,AAAA,OAAO,CAAC,EACN,OAAO,EAAE,IAAI,EACb,KAAK,EAAE,IAAI,EACX,MAAM,EAAE,IAAI,EACZ,WAAW,EAAE,MAAM,GAIpB;;AARD,AAKE,OALK,CAKL,EAAE,CAAC,EACD,YAAY,EAAE,KAAK,GACpB;;AAGH,AAAA,EAAE,CAAC,EACD,UAAU,EAAE,MAAM,EAClB,IAAI,EAAE,GAAG,EACT,KAAK,EAAE,IAAI,EACX,KAAK,EAAE,IAAI,GACZ;;AAED,AAAA,UAAU,CAAC,EACT,KAAK,EAAE,IAAI,EACX,MAAM,EAAE,IAAI,GACb;;AAED,AAAA,UAAU,CAAC,EACT,WAAW,EAAE,IAAI,GAClB"
+}
