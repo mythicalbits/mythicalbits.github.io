@@ -11,6 +11,13 @@ body {
   padding-right: 5rem;
 }
 
+hr {
+  margin-top: 0.5rem;
+  size: 1em;
+  width: 100%;
+  color: #333;
+}
+
 #logo {
   height: inherit;
 }
@@ -25,11 +32,9 @@ body {
   }
 }
 
-hr {
-  margin-top: 0.5rem;
-  size: 1em;
-  width: 100%;
-  color: #333;
+#nav {
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 #container {
@@ -39,4 +44,11 @@ hr {
 
 #post-list {
   padding-top: 3rem;
+  list-style: none;
 }
+
+.post-list-item {
+  border: 1px solid #333;
+  padding: 1rem;
+}
+

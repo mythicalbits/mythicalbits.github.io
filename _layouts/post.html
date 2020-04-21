@@ -1,9 +1,12 @@
 ---
 layout: default
 ---
+<div id='nav'>
+  <a href="/index.html">Home</a>
+</div>
 <div class='post-container'>
   <h3> {{ page.title }}</h3>
   <p>{{ page.date | date_to_string }}</p>
   <hr class='post-title-line'/>
-  {{ content }}
+  {{ content | remove: page.excerpt }}
 </div>
