@@ -16,4 +16,4 @@ hr { margin-top: 0.5rem; size: 1em; width: 100%; color: #333; }
 
 #post-list { padding-top: 3rem; list-style: none; }
 
-.post-list-item { border: 1px solid #333; padding: 1rem; }
+.post-list-item { border: 1px solid #333; padding: 1rem; margin-bottom: 1rem; }
