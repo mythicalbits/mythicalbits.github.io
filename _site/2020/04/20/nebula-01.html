@@ -22,8 +22,8 @@
   <!--more-->
 
 <p>Ok, so the first thing to understand is that <code class="language-plaintext highlighter-rouge">setuid</code> and <code class="language-plaintext highlighter-rouge">setgid</code> are unix flags that allow us to
-run an executable with the permissions of the executables owner or group. If not designed properly,
-they can be used for privilege escalation.</p>
+run an executable with the permissions of the executables owner or group. Improperly designed setuid
+executables can be used for privilege escalation.</p>
 
 <p>Inspecting the <code class="language-plaintext highlighter-rouge">flag01</code> users home directory, we see a single executable named <code class="language-plaintext highlighter-rouge">/flag01</code></p>
 
@@ -104,9 +104,7 @@ privileges to run getflag</p>
 <span class="s2">"You have successfully executed getflag on a target account"</span>
 </code></pre></div></div>
 
-<p>before vanishing without a trace.</p>
-
-<p>Lessons learned:</p>
+<p>In summary:</p>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">setuid</code> executables run with the permissions of the owner</li>

