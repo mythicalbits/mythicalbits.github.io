@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-22T20:17:13-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 02</title><link href="/2020/04/22/nebula-02.html" rel="alternate" type="text/html" title="Nebula Series - Level 02" /><published>2020-04-22T00:00:00-05:00</published><updated>2020-04-22T00:00:00-05:00</updated><id>/2020/04/22/nebula-02</id><content type="html" xml:base="/2020/04/22/nebula-02.html">&lt;p&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-23T19:17:45-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 02</title><link href="/2020/04/22/nebula-02.html" rel="alternate" type="text/html" title="Nebula Series - Level 02" /><published>2020-04-22T00:00:00-05:00</published><updated>2020-04-22T00:00:00-05:00</updated><id>/2020/04/22/nebula-02</id><content type="html" xml:base="/2020/04/22/nebula-02.html">&lt;p&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
 in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
 system race conditions.&lt;/p&gt;
 
@@ -8,7 +8,7 @@ system race conditions.&lt;/p&gt;
 
 &lt;p&gt;Ok, so the first thing to understand is that you shouldn’t trust the user. If the application
 executes a command that is built either entirely or partially from user input, it’s vulnerable to
-command execution.&lt;/p&gt;
+command injection.&lt;/p&gt;
 
 &lt;p&gt;Inspecting the executable in the flag account’s home directory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/flag02&lt;/code&gt; we again see that it
 is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; and is owned by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag02&lt;/code&gt;.&lt;/p&gt;
