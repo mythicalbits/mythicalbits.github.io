@@ -6,3 +6,5 @@ kramdown:
   input: GFM
 
 highlighter: rouge
+
+exclude: [Makefile]
