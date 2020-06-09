@@ -1,4 +1,136 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-05-04T21:29:13-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 05</title><link href="/2020/05/04/nebula-05.html" rel="alternate" type="text/html" title="Nebula Series - Level 05" /><published>2020-05-04T00:00:00-05:00</published><updated>2020-05-04T00:00:00-05:00</updated><id>/2020/05/04/nebula-05</id><content type="html" xml:base="/2020/05/04/nebula-05.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-06-09T17:47:09-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 06</title><link href="/2020/06/09/nebula-06.html" rel="alternate" type="text/html" title="Nebula Series - Level 06" /><published>2020-06-09T00:00:00-05:00</published><updated>2020-06-09T00:00:00-05:00</updated><id>/2020/06/09/nebula-06</id><content type="html" xml:base="/2020/06/09/nebula-06.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
+system race conditions.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Level 06&lt;/strong&gt; shows the dangers of a weak password&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;Ok, so the first thing to understand is that back in the day, users’ hashed passwords were stored in
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/passwd&lt;/code&gt;. This file was, and still is, world-readable – meaning it’s readable by all users.
+That file also contains user IDs and group IDs which many utilities depend on, so locking it down
+isn’t an option. Initially this wasn’t a cause for concern, but as processing power improved and disk
+space became cheaper, dictionary attacks became feasible.&lt;/p&gt;
+
+&lt;p&gt;The solution to this was something knows as the Shadow Suite. The Shadow Suite solved the problem by
+moving passwords into a separate file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/shadow&lt;/code&gt; which is only readable by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;. In addition to
+that change, the suite introduced a lot of nice features like password aging and expiration and
+various utilities for managing users and groups.&lt;/p&gt;
+
+&lt;p&gt;The instructions for this level indicate that “The flag06 account credentials came from a legacy
+unix system.” That’s a pretty big hint…&lt;/p&gt;
+
+&lt;p&gt;Let’s take a look at the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/password&lt;/code&gt; file&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level06@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+&lt;span class=&quot;nb&quot;&gt;sync&lt;/span&gt;:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;admin&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;:/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+syslog:x:101:103::/home/syslog:/bin/false
+messagebus:x:102:104::/var/run/dbus:/bin/false
+nebula:x:1000:1000:nebula,,,:/home/nebula:/bin/bash
+sshd:x:103:65534::/var/run/sshd:/usr/sbin/nologin
+level00:x:1001:1001::/home/level00:/bin/sh
+flag00:x:999:999::/home/flag00:/bin/sh
+level01:x:1002:1002::/home/level01:/bin/sh
+flag01:x:998:998::/home/flag01:/bin/sh
+level02:x:1003:1003::/home/level02:/bin/sh
+flag02:x:997:997::/home/flag02:/bin/sh
+level03:x:1004:1004::/home/level03:/bin/sh
+flag03:x:996:996::/home/flag03:/bin/sh
+level04:x:1005:1005::/home/level04:/bin/sh
+flag04:x:995:995::/home/flag04:/bin/sh
+level05:x:1006:1006::/home/level05:/bin/sh
+flag05:x:994:994::/home/flag05:/bin/sh
+level06:x:1007:1007::/home/level06:/bin/sh
+flag06:ueqwOCnSGdsuM:993:993::/home/flag06:/bin/sh
+level07:x:1008:1008::/home/level07:/bin/sh
+flag07:x:992:992::/home/flag07:/bin/sh
+level08:x:1009:1009::/home/level08:/bin/sh
+flag08:x:991:991::/home/flag08:/bin/sh
+level09:x:1010:1010::/home/level09:/bin/sh
+flag09:x:990:990::/home/flag09:/bin/sh
+level10:x:1011:1011::/home/level10:/bin/sh
+flag10:x:989:989::/home/flag10:/bin/sh
+level11:x:1012:1012::/home/level11:/bin/sh
+flag11:x:988:988::/home/flag11:/bin/sh
+level12:x:1013:1013::/home/level12:/bin/sh
+flag12:x:987:987::/home/flag12:/bin/sh
+level13:x:1014:1014::/home/level13:/bin/sh
+flag13:x:986:986::/home/flag13:/bin/sh
+level14:x:1015:1015::/home/level14:/bin/sh
+flag14:x:985:985::/home/flag14:/bin/sh
+level15:x:1016:1016::/home/level15:/bin/sh
+flag15:x:984:984::/home/flag15:/bin/sh
+level16:x:1017:1017::/home/level16:/bin/sh
+flag16:x:983:983::/home/flag16:/bin/sh
+level17:x:1018:1018::/home/level17:/bin/sh
+flag17:x:982:982::/home/flag17:/bin/sh
+level18:x:1019:1019::/home/level18:/bin/sh
+flag18:x:981:981::/home/flag18:/bin/sh
+level19:x:1020:1020::/home/level19:/bin/sh
+flag19:x:980:980::/home/flag19:/bin/sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can see that unlike the other accounts, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag06&lt;/code&gt; has what looks like a password hash in the
+second column.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level06@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /etc/passwd | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;flag06
+flag06:ueqwOCnSGdsuM:993:993::/home/flag06:/bin/sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, so our path forward should be clear. We can break that hash with something like &lt;a href=&quot;https://www.openwall.com/john/&quot;&gt;John the
+Ripper&lt;/a&gt;. I happen to use homebrew so I’ll install it with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;brew
+install john&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We’ll run john against that password file and then show the results.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level06@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;john &lt;span class=&quot;nt&quot;&gt;--single&lt;/span&gt; /etc/passwd
+Loaded 1 password &lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;descrypt, traditional crypt&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;3&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;DES 128/128 SSE2]&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+No password hashes left to crack &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;see FAQ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+level06@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;john &lt;span class=&quot;nt&quot;&gt;--show&lt;/span&gt; /etc/passwd
+g06:hello:993:993::/home/flag06:/bin/sh
+
+1 password &lt;span class=&quot;nb&quot;&gt;hash &lt;/span&gt;cracked, 0 left
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;That took a fraction of a second. flag06’s very strong password is apparently ‘hello’.
+Let’s test out our newly cracked password and get the flag.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level06@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;su flag06
+Password: hello
+sh-4.2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;whoami
+&lt;/span&gt;flag06
+sh-4.2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;getflag
+You have successfully executed getflag on a target account
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There it is!&lt;/p&gt;
+
+&lt;p&gt;In Summary:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;/etc/passwd used to store hashed user passwords until dictionary attacks became feasible&lt;/li&gt;
+  &lt;li&gt;/etc/shadow stores them now and is only readable by root&lt;/li&gt;
+  &lt;li&gt;use a better password than ‘hello’&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file system race conditions. Level 06 shows the dangers of a weak password</summary></entry><entry><title type="html">Nebula Series - Level 05</title><link href="/2020/05/04/nebula-05.html" rel="alternate" type="text/html" title="Nebula Series - Level 05" /><published>2020-05-04T00:00:00-05:00</published><updated>2020-05-04T00:00:00-05:00</updated><id>/2020/05/04/nebula-05</id><content type="html" xml:base="/2020/05/04/nebula-05.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
 in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
 system race conditions.&lt;/em&gt;&lt;/p&gt;
 
