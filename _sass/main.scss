@@ -20,10 +20,11 @@ hr {
 
 #logo {
   height: inherit;
+  display: block;
 }
 
 #header {
-  display: flex;
+  display: -webkit-box;
   width: 100%;
   height: 5rem;
   align-items: center;

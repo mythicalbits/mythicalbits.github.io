@@ -22,7 +22,7 @@
   <hr class='post-title-line'/>
   <!--more-->
 
-<p>Ok, so the first thing to understand is that back in the day, users’ hashed passwords were stored in
+<p>Back in the day, users’ hashed passwords were stored in
 <code class="language-plaintext highlighter-rouge">/etc/passwd</code>. This file was, and still is, world-readable – meaning it’s readable by all users.
 That file also contains user IDs and group IDs which many utilities depend on, so locking it down
 isn’t an option. Initially this wasn’t a cause for concern, but as processing power improved and disk
@@ -147,7 +147,6 @@ You have successfully executed getflag on a target account
   <li>/etc/shadow stores them now and is only readable by root</li>
   <li>use a better password than ‘hello’</li>
 </ul>
-
 
 </div>
 

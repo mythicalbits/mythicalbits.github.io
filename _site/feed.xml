@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-06-09T17:47:09-05:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 06</title><link href="/2020/06/09/nebula-06.html" rel="alternate" type="text/html" title="Nebula Series - Level 06" /><published>2020-06-09T00:00:00-05:00</published><updated>2020-06-09T00:00:00-05:00</updated><id>/2020/06/09/nebula-06</id><content type="html" xml:base="/2020/06/09/nebula-06.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-01-03T12:20:32-06:00</updated><id>/feed.xml</id><title type="html">mythicalbits.github.io</title><entry><title type="html">Nebula Series - Level 06</title><link href="/2020/06/09/nebula-06.html" rel="alternate" type="text/html" title="Nebula Series - Level 06" /><published>2020-06-09T00:00:00-05:00</published><updated>2020-06-09T00:00:00-05:00</updated><id>/2020/06/09/nebula-06</id><content type="html" xml:base="/2020/06/09/nebula-06.html">&lt;p&gt;&lt;em&gt;Nebula is the first in a series of VMs from Exploit Exercises. It consists of 20 levels which range
 in difficulty from simple to intermediate and cover topics like Linux privilege escalation and file
 system race conditions.&lt;/em&gt;&lt;/p&gt;
 
@@ -6,7 +6,7 @@ system race conditions.&lt;/em&gt;&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Ok, so the first thing to understand is that back in the day, users’ hashed passwords were stored in
+&lt;p&gt;Back in the day, users’ hashed passwords were stored in
 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/passwd&lt;/code&gt;. This file was, and still is, world-readable – meaning it’s readable by all users.
 That file also contains user IDs and group IDs which many utilities depend on, so locking it down
 isn’t an option. Initially this wasn’t a cause for concern, but as processing power improved and disk
@@ -138,7 +138,7 @@ system race conditions.&lt;/em&gt;&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Ok, so the first thing to understand is that you need to secure your backups. The instructions for this level suggest we keep an eye out for weak permissions. Easy enough, let’s
+&lt;p&gt;You need to secure your backups. The instructions for this level suggest we keep an eye out for weak permissions. Easy enough, let’s
 take a look at the target user’s home directory&lt;/p&gt;
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;level05@nebula:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
@@ -252,7 +252,7 @@ system race conditions.&lt;/em&gt;&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Ok, so the first thing to understand is that depending on filenames to prevent unauthorized access is a terrible idea.&lt;/p&gt;
+&lt;p&gt;Depending on filenames to prevent unauthorized access is a terrible idea.&lt;/p&gt;
 
 &lt;p&gt;Our goal for this level is to obtain the value stored in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/flag04/token&lt;/code&gt; file. We’re provided with the following
 source code for the executable at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/flag04/flag04&lt;/code&gt;:&lt;/p&gt;
@@ -372,7 +372,7 @@ system race conditions.&lt;/em&gt;&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Ok, so the first thing to understand is that cron jobs, similar to setuid binaries, run as a specific user. The instructions for
+&lt;p&gt;Cron jobs, similar to setuid binaries, run as a specific user. The instructions for
 this level indicate that there is a crontab that is called every couple of minutes and that we should inspect the files in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/home/flag03&lt;/code&gt;
 for more clues.&lt;/p&gt;
 
@@ -492,7 +492,7 @@ system race conditions.&lt;/em&gt;&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Ok, so the first thing to understand is that you shouldn’t trust the user. If the application
+&lt;p&gt;You shouldn’t trust the user. If the application
 executes a command that is built either entirely or partially from user input, it’s vulnerable to
 command injection.&lt;/p&gt;
 
@@ -578,8 +578,8 @@ to invoke another executable from within our code.&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Ok, so the first thing to understand is that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setgid&lt;/code&gt; are unix flags that allow us to
-run an executable with the permissions of the executables owner or group. Improperly designed setuid
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuid&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setgid&lt;/code&gt; are unix flags that allow us to
+run an executable with the permissions of the executable’s owner or group. Improperly designed setuid
 executables can be used for privilege escalation.&lt;/p&gt;
 
 &lt;p&gt;Inspecting the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flag01&lt;/code&gt; users home directory, we see a single executable named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/flag01&lt;/code&gt;&lt;/p&gt;
